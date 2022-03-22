@@ -24,6 +24,7 @@ import { useCamelCaseEnvironmentPropertiesRule } from './rules/use-camel-case-en
 import { useComponentChangeDetectionRule } from './rules/use-component-change-detection';
 import { useCorrectComponentOverridesRule } from './rules/use-correct-component-overrides';
 import { useJestExtendedMatchersInTestsRule } from './rules/use-jest-extended-matchers-in-tests';
+import { useSsrVariableInsteadOfPlatformIdRule } from './rules/use-ssr-variable-instead-of-platform-id';
 
 const rules = {
   'no-return-undefined': noReturnUndefinedRule,
@@ -52,6 +53,7 @@ const rules = {
   'use-correct-component-overrides': useCorrectComponentOverridesRule,
   'meaningful-describe-in-tests': meaningfulDescribeInTestsRule,
   'no-formly-explicit-pseudo-type': noFormlyExplicitPseudoTypeRule,
+  'use-ssr-variable-instead-of-platform-id': useSsrVariableInsteadOfPlatformIdRule,
 };
 
 module.exports = {
