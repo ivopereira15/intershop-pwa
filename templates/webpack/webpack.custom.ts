@@ -1,6 +1,7 @@
 import { CustomWebpackBrowserSchema, TargetOptions } from '@angular-builders/custom-webpack';
 import * as fs from 'fs';
-import { basename, join, resolve } from 'path';
+import { flatten } from 'lodash';
+import { basename, join, normalize, resolve } from 'path';
 import { Configuration, DefinePlugin, WebpackPluginInstance } from 'webpack';
 
 /* eslint-disable no-console */
@@ -334,8 +335,64 @@ export default (config: Configuration, angularJsonConfig: CustomWebpackBrowserSc
     }
   }
 
-  // eslint-disable-next-line etc/no-commented-out-code
-  // fs.writeFileSync('effective.config.json', JSON.stringify(config, undefined, 2), { encoding: 'utf-8' });
+  process.on('exit', () => {
+    fs.mkdirSync(config.output.path, { recursive: true });
+
+    // write replacements json with relative parts for script use
+    const l = process.cwd().length + 1;
+    const relativeReplacements = Object.entries(angularCompilerPlugin.options.fileReplacements).reduce<
+      Record<string, string>
+    >((acc, [k, v]) => ({ ...acc, [k.substring(l)]: v.substring(l) }), {});
+
+    const replacementsPath = join(config.output.path, 'replacements.json');
+    logger.log('writing', replacementsPath.substring(l));
+    fs.writeFileSync(replacementsPath, JSON.stringify(relativeReplacements, undefined, 2));
+
+    const outputFolder = fs.readdirSync(config.output.path);
+    const sourceMaps = outputFolder.filter(f => f.endsWith('.js.map'));
+    if (sourceMaps.length) {
+      const activeFilesPath = join(config.output.path, 'active-files.json');
+      logger.log('writing', activeFilesPath.substring(l));
+
+      // write active file report
+      const activeFiles = flatten(
+        sourceMaps.map(sourceMapPath => {
+          const sourceMap: { sources: string[] } = JSON.parse(
+            fs.readFileSync(join(config.output.path, sourceMapPath), { encoding: 'utf-8' })
+          );
+          // replacements needed because html overrides are not swapped in source maps
+          return sourceMap.sources
+            .map(path => normalize(path))
+            .filter(path => path.startsWith('src') || path.startsWith('projects'))
+            .map(path => relativeReplacements[path] ?? path)
+            .filter(path => {
+              // TODO: handle lazy sources whenever this becomes a problem
+              if (path.includes('|lazy|')) {
+                logger.warn('cannot handle lazy source:', path);
+                return false;
+              }
+              return true;
+            });
+        })
+      )
+        .filter((v, i, a) => a.indexOf(v) === i)
+        .sort();
+      fs.writeFileSync(activeFilesPath, JSON.stringify(activeFiles, undefined, 2));
+    }
+
+    if (process.env.npm_config_dry_run) {
+      const effectiveConfigPath = join(config.output.path, 'effective.config.json');
+      logger.log('writing', effectiveConfigPath.substring(l));
+      fs.writeFileSync(effectiveConfigPath, JSON.stringify(config, undefined, 2));
+    }
+  });
+
+  // do not execute the build if npm was started with --dry-run
+  // useful for debugging config and reusing replacement logic in other places
+  if (process.env.npm_config_dry_run) {
+    logger.warn('got --dry-run -- EXITING!');
+    process.exit(0);
+  }
 
   return config;
 };
