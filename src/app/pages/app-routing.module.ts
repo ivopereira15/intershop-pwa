@@ -131,6 +131,7 @@ const routes: Routes = [
     },
   },
   { path: 'cookies', loadChildren: () => import('./cookies/cookies-page.module').then(m => m.CookiesPageModule) },
+  { path: 'blog', loadChildren: () => import('./blog/blog-page.module').then(m => m.BlogPageModule) },
 ];
 
 @NgModule({

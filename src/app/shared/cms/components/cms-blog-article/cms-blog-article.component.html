@@ -1,0 +1,27 @@
+<ng-container *ngIf="callParameters?.ArticleView === 'list'; else detail">
+  <div class="col-sm-6 helpdesk-info-box">
+    <h2>{{ pagelet.stringParam('Headline') }}</h2>
+    <div class="pb-3">Author: {{ pagelet.stringParam('Author') }}</div>
+    <div [innerHTML]="pagelet.stringParam('Abstract')" class="pb-3"></div>
+    <a [routerLink]="'/blog/' + pagelet.id">Show more >></a>
+  </div>
+</ng-container>
+
+<ng-template #detail>
+  <h1>{{ pagelet.stringParam('Headline') }}</h1>
+  <div class="pb-3">Author: {{ pagelet.stringParam('Author') }}</div>
+  <div class="row pb-3">
+    <div class="col-sm-3">
+      <img *ngIf="pagelet.stringParam('Image')" [src]="pagelet.stringParam('Image')" itemprop="image" />
+    </div>
+    <div class="col-sm-5">
+      <h2 [innerHTML]="pagelet.stringParam('Subline')"></h2>
+      <div [innerHTML]="pagelet.stringParam('Content')"></div>
+      <div class="pt-3"># {{ pagelet.stringParam('Tags') }}</div>
+    </div>
+    <div class="col-sm-4">
+      {{ pagelet.configurationParameters | json }}
+    </div>
+  </div>
+  <a [routerLink]="'/blog'"><< Back to Overview</a>
+</ng-template>

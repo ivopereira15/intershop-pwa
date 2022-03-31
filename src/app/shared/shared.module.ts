@@ -34,6 +34,7 @@ import { TactonExportsModule } from '../extensions/tacton/exports/tacton-exports
 import { WishlistsExportsModule } from '../extensions/wishlists/exports/wishlists-exports.module';
 
 import { CMSModule } from './cms/cms.module';
+import { CMSBlogArticleComponent } from './cms/components/cms-blog-article/cms-blog-article.component';
 import { CMSCarouselComponent } from './cms/components/cms-carousel/cms-carousel.component';
 import { CMSContainerComponent } from './cms/components/cms-container/cms-container.component';
 import { CMSDialogComponent } from './cms/components/cms-dialog/cms-dialog.component';
@@ -284,7 +285,7 @@ const exportedComponents = [
 
 @NgModule({
   imports: [...importExportModules],
-  declarations: [...declaredComponents, ...exportedComponents],
+  declarations: [...declaredComponents, ...exportedComponents, CMSBlogArticleComponent],
   exports: [...exportedComponents, ...importExportModules],
 })
 export class SharedModule {
